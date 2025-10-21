@@ -17,8 +17,9 @@ app.use(cookieParser())
 
 //ده عشان يشتغل علي اي رابط
 app.use(cors({
-  origin: "http://localhost:3000", // عنوان الفرونت
-  credentials: true,               // 🔥 يسمح بإرسال الكوكيز
+  origin: "https://store-henna-one.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
 }));
 
 const port = process.env.PORT || 3000;
