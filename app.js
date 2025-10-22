@@ -31,7 +31,7 @@ app.use(cors({
 }));
 
 // عشان طلبات OPTIONS متترفضش
-app.options("*", cors());
+app.options(/.*/, cors());
 
 // ✅ connect DB
 connectDB();
