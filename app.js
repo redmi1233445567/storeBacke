@@ -10,11 +10,30 @@ const cookieParser = require("cookie-parser");
 const authMiddleware = require("./middleware/authMiddleware");
 
 // ✅ CORS في البداية
+// Cors fix
 app.use(cors({
-  origin: ["http://localhost:3000", "https://store-henna-one.vercel.app"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials: true
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "https://store-henna-one.vercel.app"
+    ];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
 }));
+
+// اختياري: لتأكيد الهيدر دايمًا موجود حتى في الأخطاء
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  next();
+});
 
 // ✅ connect DB
 connectDB();
