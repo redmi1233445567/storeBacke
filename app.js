@@ -9,27 +9,20 @@ const users = require("./routes/user");
 const cookieParser = require("cookie-parser");
 const authMiddleware = require("./middleware/authMiddleware");
 
-// ✅ حط CORS في البداية
+// ✅ CORS في البداية
 app.use(cors({
-  origin: ["http://localhost:3000", "https://store-henna-one.vercel.app"], // ✅ بدون /
+  origin: ["http://localhost:3000", "https://store-henna-one.vercel.app"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true
 }));
 
-// ✅ لازم يتعامل مع preflight requests (OPTIONS)
-app.options("*", cors({
-  origin: ["http://localhost:3000", "https://store-henna-one.vercel.app"],
-  credentials: true
-}));
-
-//2 connect
+// ✅ connect DB
 connectDB();
 
-// لقراءة JSON و Cookies
 app.use(express.json());
 app.use(cookieParser());
 
-// Routes
+// ✅ Routes
 app.use("/api/products", authMiddleware.requireAuth, ProductsRoute);
 app.use("/api/sells", authMiddleware.requireAuth, SellesRoute);
 app.use("/api", users);
