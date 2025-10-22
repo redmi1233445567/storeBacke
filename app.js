@@ -11,29 +11,27 @@ const authMiddleware = require("./middleware/authMiddleware");
 
 // ✅ CORS في البداية
 // Cors fix
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://store-henna-one.vercel.app"
+];
+
 app.use(cors({
   origin: function (origin, callback) {
-    const allowedOrigins = [
-      "http://localhost:3000",
-      "https://store-henna-one.vercel.app"
-    ];
+    // السماح للـ frontend فقط
     if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
+      callback(null, origin); // نرجع نفس الـ origin اللي جاي منه الطلب
     } else {
       callback(new Error("Not allowed by CORS"));
     }
   },
+  credentials: true, // السماح بإرسال الكوكيز
   methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
-// اختياري: لتأكيد الهيدر دايمًا موجود حتى في الأخطاء
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  next();
-});
+// عشان طلبات OPTIONS متترفضش
+app.options("*", cors());
 
 // ✅ connect DB
 connectDB();
