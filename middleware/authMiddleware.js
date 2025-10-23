@@ -17,7 +17,7 @@ const requireAuth = (req, res, next) => {
       }
     });
   } else {
-    res.status(400).send(req.cookies);
+    res.status(400).send([req.cookies, req]);
   }
 };
 
