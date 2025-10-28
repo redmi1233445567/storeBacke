@@ -20,41 +20,48 @@ let getAllSell = async (req, res) => {
 
 let addSell = async (req, res) => {
     try {
-        // إنشاء عملية بيع جديدة
-        let sell = new Selles({
-            name: req.body.name,
-            desc: req.body.desc,
-            qty: req.body.qty,
-            price: req.body.price,
-            or: req.body.or,
-            date: req.body.date,
-            status: req.body.status,
-            proId: req.body.proId
-        });
+        const { date, sells, status, desc, paided } = req.body;
 
-        await sell.save();
-
-        // تحديث كمية المنتج
-        let product = await Products.findById(req.body.proId);
-
-        if (!product) {
-            return res.status(404).send("المنتج غير موجود");
+        if (!sells || !Array.isArray(sells) || sells.length === 0) {
+            return res.status(400).send("يجب إضافة منتجات داخل عملية البيع");
         }
 
-        // طرح الكمية
-        let newQty = product.qty - req.body.qty;
-        if (newQty < 0) newQty = 0; // تأكد إن الكمية مش بالسالب
+        // ✅ حساب إجمالي السعر
+        const allPrice = sells.reduce((acc, item) => acc + item.price , 0);
 
-        await Products.findByIdAndUpdate(
-            req.body.proId,
-            { $set: { qty: newQty } },
-            { new: true }
-        );
+        // ✅ إنشاء طلب جديد
+        const order = new Selles({
+            date,
+            status,
+            desc,
+            sells,
+            allPrice,
+            paided,
+            or: paided - allPrice,
+        });
 
-        res.status(200).send("تم اضافة عملية");
+        await order.save();
+
+        // ✅ تحديث كمية المنتجات
+        for (let item of sells) {
+            let product = await Products.findById(item.proId);
+
+            if (product) {
+                let updatedQty = product.qty - item.qty;
+                if (updatedQty < 0) updatedQty = 0;
+
+                await Products.findByIdAndUpdate(
+                    item.proId,
+                    { qty: updatedQty },
+                    { new: true }
+                );
+            }
+        }
+
+        res.status(200).send("✅ تم تسجيل عملية البيع بنجاح");
     } catch (err) {
         console.error(err);
-        res.status(400).send("Bad request...");
+        res.status(500).send("❌ خطأ في السيرفر");
     }
 }
 
